@@ -17,8 +17,8 @@ headers = {
 }
 
 def test():
-    if (whitelist.count("1") != 0):
-        print('whitelisted token id:' + ' ignored')
+    if (whitelist.count("tokenhunter") != 0):
+        print('whitelisted token name:' + ' ignored')
     else:
         print('removed token id: ')
 
@@ -62,14 +62,31 @@ def deleteAll() :
     while(stop != True):
         print('---------')
         try:
-            if (whitelist.count(str(parsed[i]["id"])) != 0):
-                print('whitelisted token id:' + str(parsed[i]["id"])  + ' ignored')
+            if (whitelist.count(str(parsed[i]["name"])) != 0):
+                print('whitelisted token named: ' + str(parsed[i]["name"])  + ' ignored')
             else:
                 remove_token(parsed[i]["id"])
-                print('removed token id: ' + str(parsed[i]["id"]))
+                print('removed token named: ' + str(parsed[i]["name"]))
             i = i + 1
         except:
             stop = True
+
+# def dryrun() :
+#     response = get_tokens()
+#     parsed = json.loads(response)
+#     stop = False
+#     i = 0
+
+#     while(stop != True):
+#         print('---------')
+#         try:
+#             if (whitelist.count(str(parsed[i]["name"])) != 0):
+#                 print('whitelisted token named: ' + str(parsed[i]["name"])  + ' ignored')
+#             else:
+#                 print('will remove token named: ' + str(parsed[i]["name"]))
+#             i = i + 1
+#         except:
+#             stop = True
 
 def main(argv):
     opts, args = getopt.getopt(argv,"hd:lat",["del=","list=", "all=", "test="])
