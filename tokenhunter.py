@@ -8,7 +8,7 @@ import sys, getopt
 
 load_dotenv()
 
-respo = '[{"id":1,"name":"token-checker","revoked":false,"created_at":"2023-06-19T09:42:18.505Z","scopes":["api","read_api","read_user","sudo","admin_mode"],"user_id":1,"last_used_at":"2023-06-19T09:47:38.731Z","active":true,"expires_at":"2023-07-19"},{"id":1,"name":"token-checker","revoked":false,"created_at":"2023-06-19T09:42:18.505Z","scopes":["api","read_api","read_user","sudo","admin_mode"],"user_id":1,"last_used_at":"2023-06-19T09:47:38.731Z","active":true,"expires_at":"2023-07-19"}]'
+whitelist = json.loads(os.getenv('WHITELIST'))
 
 URL = os.getenv('URL')
 
@@ -16,13 +16,15 @@ headers = {
     "PRIVATE-TOKEN": os.getenv('PRIVATE-TOKEN'),
 }
 
+def test():
+    if (whitelist.count("1") != 0):
+        print('whitelisted token id:' + ' ignored')
+    else:
+        print('removed token id: ')
+
 def get_tokens():
     response = reqs.get( URL + '/api/v4/personal_access_tokens', headers=headers)
-
-    print(response.status_code)
-    print(response.text)
-
-    return response
+    return response.text
 
 def remove_token(id):
     reqs.delete( URL + '/api/v4/personal_access_tokens/' + id , headers=headers)
@@ -30,11 +32,11 @@ def remove_token(id):
     return 0
 
 def prettylist() :
-    #response = get_tokens()
-    parsed = json.loads(respo)
+    response = get_tokens()
+    parsed = json.loads(response)
     stop = False
     i = 0
-    print('ping')
+
     while(stop != True):
         print('---------')
         try:
@@ -51,16 +53,37 @@ def prettylist() :
         except:
             stop = True
 
+def deleteAll() :
+    response = get_tokens()
+    parsed = json.loads(response)
+    stop = False
+    i = 0
+
+    while(stop != True):
+        print('---------')
+        try:
+            if (whitelist.count(str(parsed[i]["id"])) != 0):
+                print('whitelisted token id:' + str(parsed[i]["id"])  + ' ignored')
+            else:
+                remove_token(parsed[i]["id"])
+                print('removed token id: ' + str(parsed[i]["id"]))
+            i = i + 1
+        except:
+            stop = True
+
 def main(argv):
-    opts, args = getopt.getopt(argv,"hd:l",["del=","list="])
+    opts, args = getopt.getopt(argv,"hd:lat",["del=","list=", "all=", "test="])
     for opt, arg in opts:
         if opt == '-h':
-            print ('tokenhunter.py [option] (-da to delete all, -d for simple deletion, -l for listing)')
+            print ('tokenhunter.py [option] (-a to delete all, -d for simple deletion, -l for listing)')
             sys.exit()
         elif opt in ("-d", "--del"):
             remove_token(arg)
         elif opt in ("-l", "--list"):
             prettylist()
-
+        elif opt in ("-a", "--all"):
+            deleteAll()
+        elif opt in ("-t", "--test"):
+            test()
 if __name__ == '__main__':
     main(sys.argv[1:])
